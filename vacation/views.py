@@ -1,16 +1,22 @@
+from django.http.response import HttpResponseRedirect
 from django.shortcuts import render
 
-from vacation.forms import LoginForm, RegisterForm
+from vacation.forms import LoginForm, RegisterForm, ApplyToVacationForm
 
 
 def index(request):
     login_form = LoginForm()
     register_form = RegisterForm()
 
-    return render(request, 'auth/login.html', {
+    return render(request, 'vacation/login.html', {
         'login_form': login_form,
         'register_form': register_form
     })
 
 
+def schedule(request):
+    if not request.user.is_authenticated:
+        return HttpResponseRedirect('vacation:signin')
 
+    form = ApplyToVacationForm()
+    return render(request, 'vacation/schedule.html', {'form': form})

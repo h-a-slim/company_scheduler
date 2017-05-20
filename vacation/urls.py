@@ -12,6 +12,9 @@ app_name = 'vacation'
 
 urlpatterns = [
     url(r'^$', views.index, name='index'),
-    url(r'^api/login/', api.login, name='login'),
-    url(r'^api/register/', api.login, name='register')
+    url(r'^schedule/$', views.schedule, name='schedule'),
+    url(r'^api/signin/', api.signin, name='signin'),
+    url(r'^api/register/', api.register, name='register'),
+    url(r'^api/duration/', api.duration, name='duration'),
+    url(r'^api/apply/', api.apply, name='apply')
 ]

@@ -1,0 +1,101 @@
+{% extends 'vacation/master.html' %}
+{% block pagetitle %} Vacations {% endblock %}
+
+{% block body_content %}
+    <script type="text/javascript">
+        $(function () {
+            var $date_controls = $("#{{ form.date_from.auto_id }}").add("#{{ form.date_to.auto_id }}");
+            function show_duration() {
+                $.post('{% url 'vacation:duration' %} ', $('#applyform').serialize(), function (data) {
+                    if (data.status === 'ok') $('#duration').html(data.response.duration + ' day(s)');
+                }).fail(function () {
+                    $('#duration').html('<b class="error">Please check your dates</b>');
+                });
+            }
+
+            $date_controls.datepicker({
+                dateFormat: "dd-mm-yy"
+            });
+
+            $date_controls.on('validation', function (evt, valid) {
+                $(this).attr("data-valid", valid);
+                if ($($date_controls.get(0)).attr("data-valid") == "true" &&
+                    $($date_controls.get(1)).attr("data-valid") == "true") {
+                    show_duration();
+                }
+            });
+
+            $.validate({
+                onError: function () {
+                    return false;
+                },
+                onSuccess: function () {
+                    return true;
+                }
+            });
+
+            $('#btn-apply').click(function () {
+                $.post('{% url 'vacation:apply' %}', $('#applyform').serialize(), function(data){
+                    if(data.status === "ok") alert("Added i hope");
+                });
+            });
+        });
+    </script>
+    <div class="container">
+
+        <div id="apply"
+             class="mainbox col-md-6 col-md-offset-3 col-sm-8 col-sm-offset-2">
+            <div class="panel panel-info">
+                <div class="panel-heading">
+                    <div class="panel-title">Apply for vacation - {{ request.user.first_name }}</div>
+                </div>
+                <div class="panel-body">
+                    <form id="applyform" class="form-horizontal" role="form" method="POST"
+                          action="{% url 'vacation:apply' %}">
+                        {% csrf_token %}
+
+
+                        <div class="form-group">
+                            <label for="date_from" class="col-md-3 control-label">From</label>
+                            <div class="col-md-9">
+                                {{ form.date_from }}
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="date_to" class="col-md-3 control-label">To</label>
+                            <div class="col-md-9">
+                                {{ form.date_to }}
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="duration" class="col-md-3 control-label">Duration</label>
+                            <div class="col-md-9">
+                                <label id="duration" class="form-control-static"></label>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="description" class="col-md-3 control-label">Description</label>
+                            <div class="col-md-9">
+                                {{ form.description }}
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <!-- Button -->
+                            <div class="col-md-3 col-md-offset-9">
+                                <button id="btn-apply" type="button" class="btn btn-info"><i
+                                        class="icon-hand-right"></i>
+                                    &nbsp Apply Now
+                                </button>
+                            </div>
+                        </div>
+
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock body_content %}
