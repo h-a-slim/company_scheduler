@@ -3,7 +3,7 @@ from datetime import date
 from django.test import TestCase
 
 # Create your tests here.
-from vacation.dates import generate_dates, exc_weekends
+from vacation.dates import generate_dates, not_weekend
 
 
 class VacationDurationTestCase(TestCase):
@@ -17,6 +17,6 @@ class VacationDurationTestCase(TestCase):
         self.assertEqual(len(dates), 5, "5 days must be generated")
 
     def test_duration_exclude_weekends(self):
-        dates = [x for x in generate_dates(date_from=self.date_from, date_to=self.date_to, accept=exc_weekends)]
+        dates = list(filter(not_weekend, generate_dates(date_from=self.date_from, date_to=self.date_to)))
         print(dates)
         self.assertEqual(len(dates), 3, "3 days must be generated")

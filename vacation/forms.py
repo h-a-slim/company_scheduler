@@ -69,7 +69,7 @@ class ApplyToVacationForm(forms.Form):
         attrs={
             'class': 'form-control',
             'data-validation': 'length alphanumeric required',
-            'data - validation - allowing': "-_.;",
+            'data-validation-allowing': "-_.;",
             'data-validation-length': '10-100'
         }
     ))

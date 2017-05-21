@@ -1,12 +1,12 @@
-from datetime import datetime
 
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.models import User
 from django.http import HttpResponseBadRequest
 from django.http.response import JsonResponse, HttpResponseServerError
 
-from vacation.dates import generate_dates, exc_weekends
+from vacation.dates import generate_dates, not_weekend
 from vacation.forms import LoginForm, RegisterForm, VacationDuration, ApplyToVacationForm
+from vacation.models import VacationModel
 
 
 def api_response(http_status_code=200, api_status='ok', api_response_body={}):
@@ -21,10 +21,26 @@ def error(http_status_code, api_status='error', body='error occurred'):
     return api_response(http_status_code, api_status, {'error': body})
 
 
-def signin(request):
-    if not request.method == 'POST':
-        return error(HttpResponseBadRequest.status_code, body='request method not supported')
+def only_post(api_operation):
+    def call_if_post(request):
+        if not request.method == 'POST':
+            return error(HttpResponseBadRequest.status_code, body='request method not supported')
+        return api_operation(request)
 
+    return call_if_post
+
+
+def only_authenticated(api_operation):
+    def call_if_authenticated(request):
+        if not request.user.is_authenticated:
+            return error(HttpResponseBadRequest.status_code, body='sign in please')
+        return api_operation(request)
+
+    return call_if_authenticated
+
+
+@only_post
+def signin(request):
     login_form = LoginForm(request.POST)
 
     if login_form.is_valid():
@@ -41,10 +57,8 @@ def signin(request):
     return error(HttpResponseServerError.status_code, body='request cannot be fulfilled at this time')
 
 
+@only_post
 def register(request):
-    if not request.method == 'POST':
-        return error(HttpResponseBadRequest.status_code, body='request method not supported')
-
     register_form = RegisterForm(request.POST)
 
     if register_form.is_valid():
@@ -65,10 +79,9 @@ def register(request):
     return error(HttpResponseServerError.status_code, body='request cannot be fulfilled at this time')
 
 
+@only_post
+@only_authenticated
 def duration(request):
-    if not request.method == 'POST':
-        return error(HttpResponseBadRequest.status_code, body='request method not supported')
-
     vacation_form = VacationDuration(request.POST)
     if vacation_form.is_valid():
         vacation_form.clean()
@@ -78,30 +91,41 @@ def duration(request):
         if date_from > date_to:
             return error(HttpResponseBadRequest.status_code, body='date from cannot be greater than date till')
 
-        dates = [x for x in generate_dates(date_from=date_from, date_to=date_to, accept=exc_weekends)]
-        return ok({'duration': len(dates)})
+        nb_days = sum(map(not_weekend, generate_dates(date_from=date_from, date_to=date_to)))
+
+        if nb_days <= 0:
+            return error(HttpResponseBadRequest.status_code, body='please check your dates')
+
+        return ok({'duration': nb_days})
     else:
         return error(HttpResponseBadRequest.status_code, body=vacation_form.errors)
 
     return error(HttpResponseServerError.status_code, body='request cannot be fulfilled at this time')
 
 
+@only_post
+@only_authenticated
 def apply(request):
-    if not request.method == 'POST':
-        return error(HttpResponseBadRequest.status_code, body='request method not supported')
-
     apply_form = ApplyToVacationForm(request.POST)
+
     if apply_form.is_valid():
         apply_form.clean()
 
         date_from = apply_form.cleaned_data['date_from']
         date_to = apply_form.cleaned_data['date_to']
+        description = apply_form.cleaned_data['description']
 
         if date_from > date_to:
             return error(HttpResponseBadRequest.status_code, body='date from cannot be greater than date till')
 
-        dates = [x for x in generate_dates(date_from=date_from, date_to=date_to, accept=exc_weekends)]
-        return ok({'duration': len(dates)})
+        nb_days = sum(map(not_weekend, generate_dates(date_from=date_from, date_to=date_to)))
+        if nb_days <= 0:
+            return error(HttpResponseBadRequest.status_code, body='please check your dates')
+
+        vacation = VacationModel(date_from=date_from, date_to=date_to, description=description, user=request.user)
+        vacation.save()
+
+        return ok(body='success')
     else:
         return error(HttpResponseBadRequest.status_code, body=apply_form.errors)
 
