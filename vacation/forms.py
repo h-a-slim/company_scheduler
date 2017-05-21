@@ -1,9 +1,17 @@
+"""
+Vacation application, Forms.
+These forms are used in views as well as apis.
+"""
+
 from django import forms
 
 from company_site import settings
 
 
 class LoginForm(forms.Form):
+    """
+    Login form used in @vacation.views and @vacation.api.signin
+    """
     user_name = forms.EmailField(max_length=30, widget=forms.EmailInput(
         attrs={'class': 'form-control',
                'data-validation': 'email required'
@@ -19,6 +27,9 @@ class LoginForm(forms.Form):
 
 
 class RegisterForm(forms.Form):
+    """
+    Registration form used in @vacation.views and @vacation.api.register
+    """
     user_name = forms.EmailField(min_length=5, max_length=30, widget=forms.EmailInput(
         attrs={'class': 'form-control',
                'data-validation': 'email length required',
@@ -49,6 +60,9 @@ class RegisterForm(forms.Form):
 
 
 class ApplyToVacationForm(forms.Form):
+    """
+    Apply to vacation form, used in @vacation.views and @vacation.api.apply
+    """
     date_from = forms.DateField(input_formats=settings.DATE_INPUT_FORMATS, widget=forms.DateInput(
         attrs={
             'class': 'form-control',
@@ -76,6 +90,8 @@ class ApplyToVacationForm(forms.Form):
 
 
 class VacationDuration(forms.Form):
+    """
+    Calculate vacation duration form, used in @vacation.api.duration
+    """
     date_from = forms.DateField(input_formats=settings.DATE_INPUT_FORMATS)
-
     date_to = forms.DateField(input_formats=settings.DATE_INPUT_FORMATS)
