@@ -13,6 +13,8 @@ $(document).ready(function () {
     $('#btn-signup').click(function () {
         $.post('{% url 'vacation:register' %} ', $('#signupform').serialize(), function(data){
             if(data.status === 'ok') window.location.replace('{% url 'vacation:schedule' %}')
+        }).fail(function () {
+          alert("Please check all the fields");
         });
     });
 

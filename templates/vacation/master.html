@@ -3,19 +3,22 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html lang="en">
 
-{% with bootstrap="bootstrap/bootstrap-3.3.7-dist" jquery="jquery/jquery-3.2.1.min.js" jquery_validator="jquery/jquery.form-validator.min.js" jquery_ui="jquery/jquery-ui-1.9.2"%}
+{% with bootstrap="bootstrap/bootstrap-3.3.7-dist" jquery="jquery/jquery-3.2.1.min.js" %}
+{% with jquery_validator="jquery/jquery.form-validator.min.js" jquery_ui="jquery/jquery-ui-1.9.2"%}
 <head>
     <title>My Site - {% block pagetitle %}{% endblock %}</title>
     <script type="application/javascript" src="{% static jquery %}"></script>
     <script type="application/javascript" src="{% static jquery_ui|add:'/js/jquery-ui.js' %}"></script>
     <script type="application/javascript" src="{% static jquery_validator %}"></script>
     <script type="application/javascript" src="{% static bootstrap|add:'/js/bootstrap.min.js' %}"></script>
+    {% block head_js %}{% endblock %}
     <link rel="stylesheet" href="{% static jquery_ui|add:'/css/cupertino/jquery-ui.css' %}" />
     <link rel="stylesheet" href="{% static bootstrap|add:'/css/bootstrap.css' %}" />
     <link rel="stylesheet" href="{% static bootstrap|add:'/css/bootstrap-theme.css' %}" />
+    {% block head_css %}{% endblock %}
 </head>
 {% endwith %}
-
+{% endwith %}
 <body>
 <nav class="navbar navbar-default">
     <div class="navbar-header">

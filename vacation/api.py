@@ -11,7 +11,7 @@ from django.http.response import JsonResponse, HttpResponseServerError
 
 from vacation.dates import generate_dates, not_weekend
 from vacation.forms import LoginForm, RegisterForm, VacationDuration, ApplyToVacationForm
-from vacation.models import VacationModel
+from vacation.models import VacationModel, JqGridViewModel
 
 
 def api_response(http_status_code=200, api_status='ok', api_response_body={}):
@@ -51,6 +51,7 @@ def only_post(api_operation):
     :param api_operation: the Api function to be decorated
     :return: an Api error or calls the Api function
     """
+
     def call_if_post(request):
         if not request.method == 'POST':
             return error(HttpResponseBadRequest.status_code, body='request method not supported')
@@ -65,6 +66,7 @@ def only_authenticated(api_operation):
     :param api_operation: the Api function to be decorated
     :return: an Api error or calls the Api function
     """
+
     def call_if_authenticated(request):
         if not request.user.is_authenticated:
             return error(HttpResponseBadRequest.status_code, body='sign in please')
@@ -84,7 +86,8 @@ def signin(request):
 
     if login_form.is_valid():
         login_form.clean()
-        user = authenticate(request, username=login_form.cleaned_data['user_name'], password=login_form.cleaned_data['user_password'])
+        user = authenticate(request, username=login_form.cleaned_data['user_name'],
+                            password=login_form.cleaned_data['user_password'])
         if user is not None:
             login(request, user)
             return ok('success')
@@ -193,3 +196,29 @@ def apply(request):
 
     return error(HttpResponseServerError.status_code, body='request cannot be fulfilled at this time')
 
+
+@only_authenticated
+def employee_vacations(request):
+    """
+    Api method used to retrieve all vacations for the singed in user.
+    It returns a JqGrid json object on success.
+    reference: http://www.trirand.com/jqgridwiki/doku.php?id=wiki:retrieving_data
+    :param request:
+    :return: @api_response
+    """
+    current_page = int(request.GET['page'])
+    rows_per_page = int(request.GET['rows'])
+
+    if current_page <= 0 or rows_per_page <= 0:
+        return error(HttpResponseBadRequest.status_code, body='bad request')
+
+    jqgrid = JqGridViewModel(query_set=VacationModel.objects.filter(user=request.user), page=current_page, rows_per_page=rows_per_page)
+
+    jqgrid_json = {
+        "total": jqgrid.total_pages(),
+        "page": jqgrid.page(),
+        "records": jqgrid.records_count(),
+        "rows": jqgrid.rows_array()
+    }
+
+    return ok(body=jqgrid_json)

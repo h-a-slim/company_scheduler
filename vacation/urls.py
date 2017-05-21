@@ -16,5 +16,6 @@ urlpatterns = [
     url(r'^api/signin/', api.signin, name='signin'),
     url(r'^api/register/', api.register, name='register'),
     url(r'^api/duration/', api.duration, name='duration'),
-    url(r'^api/apply/', api.apply, name='apply')
+    url(r'^api/apply/', api.apply, name='apply'),
+    url(r'^api/employee_vacations/', api.employee_vacations, name='employee_vacations')
 ]

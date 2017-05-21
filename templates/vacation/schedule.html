@@ -1,10 +1,26 @@
 {% extends 'vacation/master.html' %}
+{% load static %}
 {% block pagetitle %} Vacations {% endblock %}
+
+
+{% block head_js %}
+    {% with jqGridDir="jqGrid/jqGrid-5.2.1" %}
+        <script type="application/javascript" src="{% static jqGridDir|add:'/js/jquery.jqGrid.min.js' %}"></script>
+        <script type="application/javascript" src="{% static jqGridDir|add:'/js/grid.locale-en.js' %}"></script>
+    {% endwith %}
+{% endblock %}
+{% block head_css %}
+    {% with jqGridDir="jqGrid/jqGrid-5.2.1" %}
+        <link rel="stylesheet" type="text/css" media="screen" href="{% static jqGridDir|add:'/css/ui.jqgrid.css' %}"/>
+    {% endwith %}
+{% endblock %}
+
 
 {% block body_content %}
     <script type="text/javascript">
         $(function () {
             var $date_controls = $("#{{ form.date_from.auto_id }}").add("#{{ form.date_to.auto_id }}");
+
             function show_duration() {
                 $.post('{% url 'vacation:duration' %} ', $('#applyform').serialize(), function (data) {
                     if (data.status === 'ok') $('#duration').html(data.response.duration + ' day(s)');
@@ -35,8 +51,11 @@
             });
 
             $('#btn-apply').click(function () {
-                $.post('{% url 'vacation:apply' %}', $('#applyform').serialize(), function(data){
-                    if(data.status === "ok") alert("Added i hope");
+                $.post('{% url 'vacation:apply' %}', $('#applyform').serialize(), function (data) {
+                    if (data.status === "ok") alert("Your vacation has been added.");
+                    $.validate().reset();
+                }).fail(function () {
+                    alert("Please check all the fields");
                 });
             });
         });
@@ -96,6 +115,40 @@
                     </form>
                 </div>
             </div>
+        </div>
+    </div>
+    <div class="container">
+        <script type="text/javascript">
+            $(function () {
+                var myGrid = $('#list');
+                myGrid.jqGrid({
+                    caption: "Vacations",
+                    url: '{% url 'vacation:employee_vacations' %}',
+                    datatype: "json",
+                    contentType: "application/json; charset-utf-8",
+                    mtype: 'GET',
+                    jsonReader: {
+                        root: "response.rows",
+                        page: "response.page",
+                        total: "response.total",
+                        records: "response.records",
+                        repeatitems: false
+                    },
+                    colNames: ['Vacation ID', 'From', 'Till', 'Description'],
+                    colModel: [
+                        {name: 'id'},
+                        {name: 'date_from'},
+                        {name: 'date_to'},
+                        {name: 'description'}
+                    ],
+                    rowNum: 3,
+                    pager: '#pager'
+                });
+            });
+        </script>
+        <div class="col-md-6 col-md-offset-3 col-sm-8 col-sm-offset-2">
+            <table id="list"></table>
+            <div id="pager"></div>
         </div>
     </div>
 {% endblock body_content %}
