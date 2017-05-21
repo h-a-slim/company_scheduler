@@ -27,7 +27,7 @@ def api_response(http_status_code=200, api_status='ok', api_response_body={}):
 
 def ok(body):
     """
-    pecific implementation for the @api_response function, mainly used to signify success.
+    Specific implementation for the @api_response function, mainly used to signify success.
     :param body: check @api_response
     :return: check @api_response
     """
