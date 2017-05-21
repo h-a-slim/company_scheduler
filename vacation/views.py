@@ -20,7 +20,7 @@ def index(request):
 
 def schedule(request):
     if not request.user.is_authenticated:
-        return HttpResponseRedirect('vacation:signin')
+        return HttpResponseRedirect('/vacation')
 
     form = ApplyToVacationForm()
     return render(request, 'vacation/schedule.html', {'form': form})

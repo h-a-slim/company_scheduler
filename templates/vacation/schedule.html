@@ -52,8 +52,10 @@
 
             $('#btn-apply').click(function () {
                 $.post('{% url 'vacation:apply' %}', $('#applyform').serialize(), function (data) {
-                    if (data.status === "ok") alert("Your vacation has been added.");
-                    $.validate().reset();
+                    if (data.status === "ok") {
+                        alert("Your vacation has been added.");
+                        window.location.replace('{% url 'vacation:schedule' %}')
+                    }
                 }).fail(function () {
                     alert("Please check all the fields");
                 });
@@ -134,11 +136,12 @@
                         records: "response.records",
                         repeatitems: false
                     },
-                    colNames: ['Vacation ID', 'From', 'Till', 'Description'],
+                    colNames: ['Vacation ID', 'From', 'Till', 'Days', 'Description'],
                     colModel: [
                         {name: 'id'},
                         {name: 'date_from'},
                         {name: 'date_to'},
+                        {name: 'duration'},
                         {name: 'description'}
                     ],
                     rowNum: 3,

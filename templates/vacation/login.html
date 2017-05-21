@@ -6,7 +6,9 @@ $(document).ready(function () {
     $('#btn-login').click(function () {
         $.post('{% url 'vacation:signin' %}', $('#loginform').serialize(), function(data){
             if(data.status === 'ok') window.location.replace('{% url 'vacation:schedule' %}')
-        });
+        }).fail(function () {
+          alert("Please check all the fields");
+        });;
     });
 
 

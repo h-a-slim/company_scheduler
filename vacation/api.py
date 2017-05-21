@@ -187,7 +187,8 @@ def apply(request):
         if nb_days <= 0:
             return error(HttpResponseBadRequest.status_code, body='please check your dates')
 
-        vacation = VacationModel(date_from=date_from, date_to=date_to, description=description, user=request.user)
+        vacation = VacationModel(
+            date_from=date_from, date_to=date_to, description=description, user=request.user, duration=nb_days)
         vacation.save()
 
         return ok(body='success')

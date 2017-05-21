@@ -27,14 +27,16 @@ class VacationModel(models.Model, JsonSupportModel):
     date_from = models.DateField()
     date_to = models.DateField()
     description = models.CharField(max_length=100)
+    duration = models.IntegerField()
     user = models.ForeignKey(User, on_delete=models.CASCADE)
 
     def to_dict(self):
         return {
             'id': self.id,
-            'date_from': self.date_from,
-            'date_to': self.date_to,
-            'description': self.description
+            'date_from': self.date_from.strftime('%d-%m-%Y'),
+            'date_to': self.date_to.strftime('%d-%m-%Y'),
+            'description': self.description,
+            'duration': self.duration
         }
 
 
